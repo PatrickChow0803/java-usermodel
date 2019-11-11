@@ -4,6 +4,7 @@ import com.lambdaschool.usermodel.models.User;
 import com.lambdaschool.usermodel.models.Useremail;
 import com.lambdaschool.usermodel.repository.RoleRepository;
 import com.lambdaschool.usermodel.repository.UserRepository;
+import com.lambdaschool.usermodel.views.UserNameCountEmails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -129,4 +130,51 @@ public class UserServiceImpl implements UserService
 
         return userrepos.save(currentUser);
     }
+
+    @Override
+    public List<UserNameCountEmails> getCountUserEmails() {
+        return userrepos.getCountUserEmails();
+    }
+
+    @Override
+    public void deleteUserRole(long userid, long roleid) {
+        userrepos.findById(userid)
+                .orElseThrow(() -> new EntityNotFoundException("User id " + userid + " not found!"));
+        rolerepos.findById(roleid)
+                .orElseThrow(() -> new EntityNotFoundException("Role id " + roleid + " not found!"));
+        if (rolerepos.checkUserRolesCombo(userid,
+                roleid)
+                .getCount() > 0)
+        {
+            rolerepos.deleteUserRoles(userid,
+                    roleid);
+        } else
+        {
+            throw new EntityNotFoundException("Role and User Combination Does Not Exists");
+        }
+    }
+
+    @Transactional
+    @Override
+    public void addUserRole(long userid,
+                            long roleid)
+    {
+        userrepos.findById(userid)
+                .orElseThrow(() -> new EntityNotFoundException("User id " + userid + " not found!"));
+        rolerepos.findById(roleid)
+                .orElseThrow(() -> new EntityNotFoundException("Role id " + roleid + " not found!"));
+        if (rolerepos.checkUserRolesCombo(userid,
+                roleid)
+                .getCount() <= 0)
+        {
+            rolerepos.insertUserRoles(userid,
+                    roleid);
+        } else
+        {
+            throw new EntityNotFoundException("Role and User Combination Already Exists");
+        }
+    }
+
+
+
 }

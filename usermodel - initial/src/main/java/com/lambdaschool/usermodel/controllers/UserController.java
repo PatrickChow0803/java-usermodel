@@ -192,4 +192,19 @@ public class UserController
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
+    // Get a list of usernames and displays the amount of emails that they have
+    // http://localhost:2019/users/user/email/count
+    @GetMapping (value = "/user/email/count",
+                 produces = {"application/json"})
+    public ResponseEntity<?> getNumUserEmails(){
+
+        return new ResponseEntity<>(userService.getCountUserEmails(), HttpStatus.OK);
+    }
 }
+
+
+
+
+
+
+
