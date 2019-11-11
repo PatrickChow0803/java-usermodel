@@ -8,14 +8,14 @@ import javax.validation.constraints.Email;
 @Entity
 @Table(name = "useremails",
        uniqueConstraints = {@UniqueConstraint(columnNames = {"userid", "useremail"})})
-public class Useremail
+public class Useremail extends Auditable
 {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long useremailid;
 
     @Column(nullable = false)
-    @Email
+    @Email // Checks for proper email format
     private String useremail;
 
     @ManyToOne

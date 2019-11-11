@@ -12,7 +12,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class User
+public class User extends Auditable
 {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -23,12 +23,12 @@ public class User
     private String username;
 
     @Column(nullable = false)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // Makes it so that password can only be written, not read.
     private String password;
 
     @Column(nullable = false,
             unique = true)
-    @Email
+    @Email // Checks for proper email format
     private String primaryemail;
 
     @OneToMany(mappedBy = "user",
