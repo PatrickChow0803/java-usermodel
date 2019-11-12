@@ -11,7 +11,7 @@ public class UserModelApplication
 
     public static void main(String[] args)
     {
-            SpringApplication.run(UserModelApplication.class,
-                                                           args);
+        SpringApplication.run(UserModelApplication.class,
+                              args);
     }
 }

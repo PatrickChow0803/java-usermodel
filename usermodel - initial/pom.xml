@@ -57,7 +57,10 @@
     </dependencies>
 
     <build>
+<<<<<<< HEAD
 
+=======
+>>>>>>> b1f434b0fea142b329446273234fb70d9de43e6d
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

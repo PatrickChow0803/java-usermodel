@@ -6,8 +6,8 @@ import com.lambdaschool.usermodel.models.UserRoles;
 import com.lambdaschool.usermodel.models.Useremail;
 import com.lambdaschool.usermodel.repository.RoleRepository;
 import com.lambdaschool.usermodel.repository.UserRepository;
+import com.lambdaschool.usermodel.view.UserNameCountEmails;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +25,9 @@ public class UserServiceImpl implements UserService
     @Autowired
     private RoleRepository rolerepos;
 
+    @Autowired
+    private UserAuditing userAuditing;
+
     public User findUserById(long id) throws EntityNotFoundException
     {
         return userrepos.findById(id)
@@ -32,11 +35,9 @@ public class UserServiceImpl implements UserService
     }
 
     @Override
-    public List<User> findByNameContaining(String username
-                                           )
+    public List<User> findByNameContaining(String username)
     {
-        return userrepos.findByUsernameContainingIgnoreCase(username.toLowerCase()
-                                                          );
+        return userrepos.findByUsernameContainingIgnoreCase(username.toLowerCase());
     }
 
     @Override
@@ -73,15 +74,18 @@ public class UserServiceImpl implements UserService
     @Override
     public User save(User user)
     {
-        if (userrepos.findByUsername(user.getUsername().toLowerCase()) != null)
+        if (userrepos.findByUsername(user.getUsername()
+                                         .toLowerCase()) != null)
         {
             throw new EntityNotFoundException(user.getUsername() + " is already taken!");
         }
 
         User newUser = new User();
-        newUser.setUsername(user.getUsername().toLowerCase());
+        newUser.setUsername(user.getUsername()
+                                .toLowerCase());
         newUser.setPassword(user.getPassword());
-        newUser.setPrimaryemail(user.getPrimaryemail().toLowerCase());
+        newUser.setPrimaryemail(user.getPrimaryemail()
+                                    .toLowerCase());
 
         ArrayList<UserRoles> newRoles = new ArrayList<>();
         for (UserRoles ur : user.getUserroles())
@@ -90,7 +94,6 @@ public class UserServiceImpl implements UserService
                         .getRoleid();
             Role role = rolerepos.findById(id)
                                  .orElseThrow(() -> new EntityNotFoundException("Role id " + id + " not found!"));
-//fixme Does adding role still work
             newRoles.add(new UserRoles(newUser,
                                        role));
         }
@@ -112,41 +115,43 @@ public class UserServiceImpl implements UserService
                        long id)
     {
 
-            User currentUser = findUserById(id);
+        User currentUser = findUserById(id);
 
-            if (user.getUsername() != null)
+        if (user.getUsername() != null)
+        {
+            currentUser.setUsername(user.getUsername()
+                                        .toLowerCase());
+        }
+
+        if (user.getPassword() != null)
+        {
+            currentUser.setPassword(user.getPassword());
+        }
+
+        if (user.getPrimaryemail() != null)
+        {
+            currentUser.setPrimaryemail(user.getPrimaryemail()
+                                            .toLowerCase());
+        }
+
+        if (user.getUserroles()
+                .size() > 0)
+        {
+            throw new EntityNotFoundException("User Roles are not updated through User. See endpoint POST: users/user/{userid}/role/{roleid}");
+        }
+
+        if (user.getUseremails()
+                .size() > 0)
+        {
+            for (Useremail ue : user.getUseremails())
             {
-                currentUser.setUsername(user.getUsername().toLowerCase());
+                currentUser.getUseremails()
+                           .add(new Useremail(currentUser,
+                                              ue.getUseremail()));
             }
+        }
 
-            if (user.getPassword() != null)
-            {
-                currentUser.setPassword(user.getPassword());
-            }
-
-            if (user.getPrimaryemail() != null)
-            {
-                currentUser.setPrimaryemail(user.getPrimaryemail().toLowerCase());
-            }
-
-            if (user.getUserroles()
-                    .size() > 0)
-            {
-                throw new EntityNotFoundException("User Roles are not updated through User. See endpoint POST: users/user/{userid}/role/{roleid}");
-            }
-
-            if (user.getUseremails()
-                    .size() > 0)
-            {
-                for (Useremail ue : user.getUseremails())
-                {
-                    currentUser.getUseremails()
-                               .add(new Useremail(currentUser,
-                                                  ue.getUseremail()));
-                }
-            }
-
-            return userrepos.save(currentUser);
+        return userrepos.save(currentUser);
     }
 
     @Transactional
@@ -185,11 +190,18 @@ public class UserServiceImpl implements UserService
                                           roleid)
                      .getCount() <= 0)
         {
-            rolerepos.insertUserRoles(userid,
+            rolerepos.insertUserRoles(userAuditing.getCurrentAuditor().get(),
+                                      userid,
                                       roleid);
         } else
         {
             throw new EntityNotFoundException("Role and User Combination Already Exists");
         }
+    }
+
+    @Override
+    public List<UserNameCountEmails> getCountUserEmails()
+    {
+        return userrepos.getCountUserEmails();
     }
 }
