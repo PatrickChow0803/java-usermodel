@@ -1,5 +1,7 @@
 package com.lambdaschool.usermodel.services;
 
+import com.lambdaschool.usermodel.exceptions.ResourceFoundException;
+import com.lambdaschool.usermodel.exceptions.ResourceNotFoundException;
 import com.lambdaschool.usermodel.models.Role;
 import com.lambdaschool.usermodel.repository.RoleRepository;
 import com.lambdaschool.usermodel.repository.UserRepository;
@@ -38,7 +40,7 @@ public class RoleServiceImpl implements RoleService
     public Role findRoleById(long id)
     {
         return rolerepos.findById(id)
-                        .orElseThrow(() -> new EntityNotFoundException("Role id " + id + " not found!"));
+                        .orElseThrow(() -> new ResourceNotFoundException("Role id " + id + " not found!"));
     }
 
     @Override
@@ -51,7 +53,7 @@ public class RoleServiceImpl implements RoleService
             return rr;
         } else
         {
-            throw new EntityNotFoundException(name);
+            throw new ResourceNotFoundException(name + " not found!");
         }
     }
 
@@ -60,7 +62,7 @@ public class RoleServiceImpl implements RoleService
     public void delete(long id)
     {
         rolerepos.findById(id)
-                 .orElseThrow(() -> new EntityNotFoundException("Role id " + id + " not found!"));
+                 .orElseThrow(() -> new ResourceNotFoundException("Role id " + id + " not found!"));
         rolerepos.deleteById(id);
     }
 
@@ -72,13 +74,13 @@ public class RoleServiceImpl implements RoleService
     {
         if (role.getName() == null)
         {
-            throw new EntityNotFoundException("No role name found to update!");
+            throw new ResourceNotFoundException("No role name found to update!");
         }
 
         if (role.getUserroles()
                 .size() > 0)
         {
-            throw new EntityNotFoundException("User Roles are not updated through Role. See endpoint POST: users/user/{userid}/role/{roleid}");
+            throw new ResourceFoundException("User Roles are not updated through Role. See endpoint POST: users/user/{userid}/role/{roleid}");
         }
 
         Role newRole = findRoleById(id); // see if id exists
@@ -99,7 +101,7 @@ public class RoleServiceImpl implements RoleService
         if (role.getUserroles()
                 .size() > 0)
         {
-            throw new EntityNotFoundException("User Roles are not updated through Role. See endpoint POST: users/user/{userid}/role/{roleid}");
+            throw new ResourceFoundException("User Roles are not updated through Role. See endpoint POST: users/user/{userid}/role/{roleid}");
         }
 
         return rolerepos.save(role);

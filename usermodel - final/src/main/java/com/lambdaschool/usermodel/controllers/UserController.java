@@ -2,6 +2,8 @@ package com.lambdaschool.usermodel.controllers;
 
 import com.lambdaschool.usermodel.models.User;
 import com.lambdaschool.usermodel.services.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -9,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,6 +22,7 @@ import java.util.List;
 public class UserController
 {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
     private UserService userService;
 
@@ -27,6 +31,8 @@ public class UserController
                 produces = {"application/json"})
     public ResponseEntity<?> listAllUsers()
     {
+        logger.info("We have accessed the user endpoint");
+        logger.error("Something went wrong in the user endpoint");
         List<User> myUsers = userService.findAll();
         return new ResponseEntity<>(myUsers,
                                     HttpStatus.OK);
